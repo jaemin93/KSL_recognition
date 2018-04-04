@@ -87,8 +87,6 @@ with tf.Session() as sess:
             img_sequence = np.zeros((200,1200,3), np.uint8)
             cv2.putText(img_sequence, '%s' % (sequence.upper()), (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
             cv2.imshow('sequence', img_sequence)
-            if cv2.waitKey(0) & 0xFF == ord('q'):
-                break
         else:
             break
 
