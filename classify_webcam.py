@@ -17,7 +17,7 @@ def predict(image_data):
     global vowel
     vowel = {'ah': 16, 'yeo': 19}
     global korean_dict
-    korean_dict = {26:'안', 28:'녕'}
+    korean_dict = {26:'안', 29:'녕'}
 
     predictions = sess.run(softmax_tensor, \
              {'DecodeJpeg/contents:0': image_data})
@@ -100,13 +100,16 @@ with tf.Session() as sess:
                                 else:
                                     key += consonant[sequence[i]]
                             except:
-                                cv2.VideoCapture(0).release()
+                                print('please again')
+                                #cv2.VideoCapture(0).release()
                                 break;    
                         if key in korean_dict:
                             print(korean_dict[key]),    
                         key = 0
                         sequence = ''
                     consecutive = 0
+                elif a == 27:
+                    cv2.VideoCapture(0).release()
             ' '.join(sequence)
             i += 1
             cv2.putText(img, '%s' % (res.upper()), (100,400), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 4)
