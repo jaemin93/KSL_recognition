@@ -12,6 +12,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 import tensorflow as tf
 
 def predict(image_data):
+    global consonant
+    consonant = {'nieun': 2, 'o': 8}
+    global vowel
+    vowel = {'ah': 16, 'yeo': 19}
+    global korean_dict
+    korean_dict = {25:'안', 28:'녕'}
 
     predictions = sess.run(softmax_tensor, \
              {'DecodeJpeg/contents:0': image_data})
@@ -45,13 +51,17 @@ with tf.Session() as sess:
 
     c = 0
 
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     res, score = '', 0.0
     i = 0
+    key = 0
+    cnt = 0
     mem = ''
     consecutive = 0
     sequence = ''
+    tmp = ''
+    
     while True:
         ret, img = cap.read()
         img = cv2.flip(img, 1)
@@ -76,8 +86,24 @@ with tf.Session() as sess:
                     elif res == 'del':
                         sequence = sequence[:-1]
                     else:
-                        sequence += res
+                        sequence += res+" "
+                        cnt += 1
+                    if cnt == 3:
+                        cnt = 0
+                        sequence = sequence.split()
+                        for i in range(len(sequence)):
+                            if i is 0:    
+                                key += consonant[sequence[i]]
+                            elif i is 1:
+                                key += vowel[sequence[i]]
+                            else:
+                                key += consonant[sequence[i]]    
+                        if korean_dict[key]:
+                            print(korean_dict[key])    
+                        key = 0
+                        sequence = ''
                     consecutive = 0
+            ' '.join(sequence)
             i += 1
             cv2.putText(img, '%s' % (res.upper()), (100,400), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 4)
             cv2.putText(img, '(score = %.5f)' % (float(score)), (100,450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
