@@ -17,7 +17,7 @@ def predict(image_data):
     global vowel
     vowel = {'ah': 16, 'yeo': 19}
     global korean_dict
-    korean_dict = {25:'안', 28:'녕'}
+    korean_dict = {26:'안', 28:'녕'}
 
     predictions = sess.run(softmax_tensor, \
              {'DecodeJpeg/contents:0': image_data})
@@ -86,20 +86,24 @@ with tf.Session() as sess:
                     elif res == 'del':
                         sequence = sequence[:-1]
                     else:
-                        sequence += res+" "
+                        sequence += res + " "
                         cnt += 1
                     if cnt == 3:
                         cnt = 0
                         sequence = sequence.split()
                         for i in range(len(sequence)):
-                            if i is 0:    
-                                key += consonant[sequence[i]]
-                            elif i is 1:
-                                key += vowel[sequence[i]]
-                            else:
-                                key += consonant[sequence[i]]    
-                        if korean_dict[key]:
-                            print(korean_dict[key])    
+                            try:
+                                if i is 0:    
+                                    key += consonant[sequence[i]]
+                                elif i is 1:
+                                    key += vowel[sequence[i]]
+                                else:
+                                    key += consonant[sequence[i]]
+                            except:
+                                cv2.VideoCapture(0).release()
+                                break;    
+                        if key in korean_dict:
+                            print(korean_dict[key]),    
                         key = 0
                         sequence = ''
                     consecutive = 0
@@ -115,6 +119,3 @@ with tf.Session() as sess:
             cv2.imshow('sequence', img_sequence)
         else:
             break
-
-
-cv2.VideoCapture(0).release()
