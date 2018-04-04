@@ -102,7 +102,7 @@ with tf.Session() as sess:
                             except:
                                 print('please again')
                                 #cv2.VideoCapture(0).release()
-                                break;    
+                                break 
                         if key in korean_dict:
                             print(korean_dict[key]),    
                         key = 0
