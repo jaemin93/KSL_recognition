@@ -51,7 +51,7 @@ with tf.Session() as sess:
 
     c = 0
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
 
     res, score = '', 0.0
     i = 0
