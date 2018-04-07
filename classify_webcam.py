@@ -13,11 +13,14 @@ import tensorflow as tf
 
 def predict(image_data):
     global consonant
-    consonant = {'nieun': 2, 'o': 8}
+    consonant = {'giyeok':1, 'nieun': 2, 'diguek':3, 'rieul': 4, 'mieum':5, 
+                'bieup':6, 'sieuh':7,'o': 8, 'jieuh': 9, 'chieuh':10, 'kieuk':11,
+                'tiguek':12, 'pieup':13, 'hieuh':14}
     global vowel
-    vowel = {'ah': 16, 'yeo': 19}
+    vowel = {'ah': 16, 'ya':17, 'uh':18, 'yeo': 19, 'oh':20, 'yo':21,
+            'woo':22, 'you':23, 'euh':24, 'yee':25}
     global korean_dict
-    korean_dict = {26:'안', 29:'녕'}
+    korean_dict = {'안': [8, 16, 2], '녕':[2, 19, 8], '년':[2, 19, 2], '난':[2,16,2]}
 
     predictions = sess.run(softmax_tensor, \
              {'DecodeJpeg/contents:0': image_data})
@@ -55,7 +58,7 @@ with tf.Session() as sess:
 
     res, score = '', 0.0
     i = 0
-    key = 0
+    key = list()
     cnt = 0
     mem = ''
     consecutive = 0
@@ -91,21 +94,35 @@ with tf.Session() as sess:
                     if cnt == 3:
                         cnt = 0
                         sequence = sequence.split()
-                        for i in range(len(sequence)):
+                        for j in range(len(sequence)):
                             try:
-                                if i is 0:    
-                                    key += consonant[sequence[i]]
-                                elif i is 1:
-                                    key += vowel[sequence[i]]
+                                if j is 0:   
+                                    key.append(consonant[sequence[j]])
+                                elif j is 1:
+                                    key.append(vowel[sequence[j]])
                                 else:
-                                    key += consonant[sequence[i]]
+                                    key.append(consonant[sequence[j]])
                             except:
-                                print('please again')
                                 #cv2.VideoCapture(0).release()
-                                break 
-                        if key in korean_dict:
-                            print(korean_dict[key]),    
-                        key = 0
+                                break
+                        check = 0
+
+                        for write, syllable in korean_dict.items():
+                            try:
+                                if key[0] == syllable[0]:
+                                    check += 1
+                                if key[1] == syllable[1]:
+                                    check += 1 
+                                if key[2] == syllable[2]:
+                                    check += 1
+                                if check == 3:
+                                    print(write),
+                                    break
+                                else:
+                                    check = 0
+                            except:
+                                break                                         
+                        key.clear()
                         sequence = ''
                     consecutive = 0
                 elif a == 27:
