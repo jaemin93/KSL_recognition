@@ -13,14 +13,17 @@ import tensorflow as tf
 
 def predict(image_data):
     global consonant
-    consonant = {'giyeok':1, 'nieun': 2, 'diguek':3, 'rieul': 4, 'mieum':5, 
+    consonant = {'noinput': 0, 'giyeok':1, 'nieun': 2, 'diguek':3, 'rieul': 4, 'mieum':5, 
                 'bieup':6, 'sieuh':7,'o': 8, 'jieuh': 9, 'chieuh':10, 'kieuk':11,
                 'tiguek':12, 'pieup':13, 'hieuh':14}
     global vowel
     vowel = {'ah': 16, 'ya':17, 'uh':18, 'yeo': 19, 'oh':20, 'yo':21,
             'woo':22, 'you':23, 'euh':24, 'yee':25}
     global korean_dict
-    korean_dict = {'안': [8, 16, 2], '녕':[2, 19, 8], '년':[2, 19, 2], '난':[2,16,2]}
+    korean_dict = {'안':[8, 16, 2], '영':[8, 19, 8], '연':[8, 19, 2],
+                    '난':[2, 16, 2], '녕':[2, 19, 8], '년':[2, 19, 2], 
+                    '산':[7, 16, 2], '셩':[7, 19, 8], '션':[7, 19, 2],
+                    '잔':[9, 16, 2], '졍':[9, 19, 8], '젼':[9, 19, 2]}
 
     predictions = sess.run(softmax_tensor, \
              {'DecodeJpeg/contents:0': image_data})
