@@ -11,7 +11,7 @@ import cv2
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 import tensorflow as tf
 
-def predict(image_data):
+def korean_component():
     global consonant
     consonant = {'noinput': 0, 'giyeok':1, 'nieun': 2, 'diguek':3, 'rieul': 4, 'mieum':5, 
                 'bieup':6, 'sieuh':7,'o': 8, 'jieuh': 9, 'chieuh':10, 'kieuk':11,
@@ -20,10 +20,17 @@ def predict(image_data):
     vowel = {'ah': 16, 'ya':17, 'uh':18, 'yeo': 19, 'oh':20, 'yo':21,
             'woo':22, 'you':23, 'euh':24, 'yee':25}
     global korean_dict
-    korean_dict = {'안':[8, 16, 2], '영':[8, 19, 8], '연':[8, 19, 2],
-                    '난':[2, 16, 2], '녕':[2, 19, 8], '년':[2, 19, 2], 
+    korean_dict = { '아':[8, 16, 0], '여':[8, 19, 0],
+                    '안':[8, 16, 2], '영':[8, 19, 8], '연':[8, 19, 2],
+                    '나':[2, 16, 0], '녀':[2, 19, 0],
+                    '난':[2, 16, 2], '녕':[2, 19, 8], '년':[2, 19, 2],
+                    '사':[7, 16, 0], '셔':[7, 19, 0], 
                     '산':[7, 16, 2], '셩':[7, 19, 8], '션':[7, 19, 2],
+                    '자':[9, 16, 0], '져':[9, 19, 0], 
                     '잔':[9, 16, 2], '졍':[9, 19, 8], '젼':[9, 19, 2]}
+
+
+def predict(image_data):
 
     predictions = sess.run(softmax_tensor, \
              {'DecodeJpeg/contents:0': image_data})
@@ -61,11 +68,12 @@ with tf.Session() as sess:
 
     res, score = '', 0.0
     i = 0
+    tmp = list()
     key = list()
     cnt = 0
     mem = ''
     consecutive = 0
-    sequence = ''
+    sequence = list()
     tmp = ''
     
     while True:
@@ -92,41 +100,11 @@ with tf.Session() as sess:
                     elif res == 'del':
                         sequence = sequence[:-1]
                     else:
-                        sequence += res + " "
-                        cnt += 1
-                    if cnt == 3:
-                        cnt = 0
-                        sequence = sequence.split()
-                        for j in range(len(sequence)):
-                            try:
-                                if j is 0:   
-                                    key.append(consonant[sequence[j]])
-                                elif j is 1:
-                                    key.append(vowel[sequence[j]])
-                                else:
-                                    key.append(consonant[sequence[j]])
-                            except:
-                                #cv2.VideoCapture(0).release()
-                                break
-                        check = 0
-
-                        for write, syllable in korean_dict.items():
-                            try:
-                                if key[0] == syllable[0]:
-                                    check += 1
-                                if key[1] == syllable[1]:
-                                    check += 1 
-                                if key[2] == syllable[2]:
-                                    check += 1
-                                if check == 3:
-                                    print(write),
-                                    break
-                                else:
-                                    check = 0
-                            except:
-                                break                                         
-                        key.clear()
-                        sequence = ''
+                        sequence.append(res)
+                    if len(sequence) is 4:
+                        key = make_key(sequence, tmp)
+                        make_syllable(key)
+                        
                     consecutive = 0
                 elif a == 27:
                     cv2.VideoCapture(0).release()
@@ -138,7 +116,54 @@ with tf.Session() as sess:
             cv2.rectangle(img, (x1, y1), (x2, y2), (255,0,0), 2)
             cv2.imshow("img", img)
             img_sequence = np.zeros((200,1200,3), np.uint8)
-            cv2.putText(img_sequence, '%s' % (sequence.upper()), (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+            #cv2.putText(img_sequence, '%s' % (sequence.upper()), (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
             cv2.imshow('sequence', img_sequence)
         else:
             break
+
+def make_key(seq, kkey):
+    kkey = list()
+    for i in range(len(seq)):
+        try:
+            if i is 0:
+                kkey.append(consonant[seq[i]])
+            elif i is 1:
+                kkey.append(vowel[seq[i]])
+            elif i is 2:
+                kkey.append(consonant[seq[i]])
+            else:
+                if seq[i] in consonant:
+                    seq[0] = seq[i]
+                    seq[1:len(seq)] = [ ] 
+                    break
+                elif seq[i] in vowel:
+                    kkey[2] = 0
+                    seq[0] = seq[i-1]
+                    seq[1] = seq[i]
+                    seq[2:len(seq)] = [ ]
+                    break
+        except:
+            break
+    return kkey
+
+def make_syllable(key):
+    check = 0
+    for write, syllable in korean_dict.items():
+        try:
+            if key[0] == syllable[0]:
+                check += 1
+            if key[1] == syllable[1]:
+                check += 1 
+            if key[2] == syllable[2]:
+                check += 1
+            if check == 3:
+                print(write),
+                break
+            else:
+                check = 0
+        except:
+            break 
+    key.clear()
+    
+                    
+
